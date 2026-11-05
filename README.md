@@ -23,6 +23,15 @@ Every museum also comes with a `card.svg` you can drop into your own README:
 ## Quick start
 
 ```bash
+npm install -g github:M0hid-ai/code-archaeologist
+
+codearch /path/to/your/repo --open
+codearch https://github.com/expressjs/express -o express-museum
+```
+
+Or from a clone:
+
+```bash
 git clone https://github.com/M0hid-ai/code-archaeologist
 cd code-archaeologist
 npm install && npm run build
@@ -31,8 +40,6 @@ node dist/src/bin.js /path/to/your/repo --open
 # or excavate straight from a URL
 node dist/src/bin.js https://github.com/expressjs/express -o express-museum
 ```
-
-Or install the `codearch` command globally with `npm install -g .`.
 
 ## The wings of the museum
 
