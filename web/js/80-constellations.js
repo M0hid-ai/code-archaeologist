@@ -68,6 +68,19 @@ function constellationSky() {
   const toScreen = (n) => [view.W / 2 + (n.x - view.cx) * view.k, view.H / 2 + (n.y - view.cy) * view.k];
   const radius = (n) => 3 + 7 * Math.sqrt(n.deg / maxDeg);
 
+  // Label only the brightest stars, skipping any too close to one already labelled.
+  const labelled = new Set();
+  function chooseLabels() {
+    labelled.clear();
+    const placed = [];
+    [...nodes.keys()].sort((a, b) => nodes[b].deg - nodes[a].deg).slice(0, 12).forEach((i) => {
+      const [x, y] = toScreen(nodes[i]);
+      if (placed.every(([px, py]) => Math.abs(px - x) > 90 || Math.abs(py - y) > 16)) {
+        placed.push([x, y]);
+        labelled.add(i);
+      }
+    });
+  }
   function draw() {
     if (!ctx) return;
     ctx.clearRect(0, 0, view.W, view.H);
@@ -101,7 +114,7 @@ function constellationSky() {
       ctx.strokeStyle = "#0c0c0b";
       ctx.lineWidth = 2;
       ctx.stroke();
-      if (hover === i || n.deg >= maxDeg * 0.35) {
+      if (hover === i || (labelled.has(i) && hover === -1)) {
         ctx.fillStyle = css("--text-secondary");
         ctx.font = "11px " + css("--mono");
         ctx.fillText(n.path.split("/").pop(), x + r + 4, y + 4);
@@ -156,6 +169,7 @@ function constellationSky() {
         view.W = w;
         view.H = hh;
         fitView();
+        chooseLabels();
         draw();
       });
     },
