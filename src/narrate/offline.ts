@@ -95,7 +95,7 @@ export function offlineNarrative(r: Report): Narrative {
   const oldestFn = [...s.functions].sort((a, b2) => a.born - b2.born)[0];
   const toughest = s.functions[0];
   const placards: Record<string, string> = {
-    timeline: `Every bar is a month of work. Coloured bands mark the ${r.eras.length} eras this project lived through; plaques mark the moments that mattered.`,
+    timeline: `Every bar is ${r.seriesUnit === "hour" ? "an hour" : `a ${r.seriesUnit}`} of work. ${r.eras.length === 1 ? "The shaded band is the single era this project has lived through so far" : `Shaded bands mark the ${r.eras.length} eras this project lived through`}; plaques mark the moments that mattered.`,
     timelapse: `Watch ${o.name} grow from its first file to ${fmt(o.filesAlive)}. Each tile is a file, sized by its line count and grouped by top-level directory. Outlined tiles are newborn; tiles that shrink away have died. Press play, and turn the sound on.`,
     survivors: toughest
       ? `${toughest.name}() in ${toughest.path} was written by ${toughest.bornBy} on ${isoDate(toughest.born)} and has survived ${fmt(toughest.commitsSurvived)} commits to its file, ${fmt(toughest.refactorsSurvived)} of them refactors.${oldestFn && oldestFn !== toughest ? ` The oldest living definition is ${oldestFn.name}(), dating from ${isoDate(oldestFn.born)}.` : ""}`
