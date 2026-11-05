@@ -16,6 +16,10 @@ or send to your team.
 
 ![The Timelapse Theater](docs/screenshots/timelapse.png)
 
+Every museum also comes with a `card.svg` you can drop into your own README:
+
+[![Express museum card](docs/demo/express/card.svg)](https://m0hid-ai.github.io/code-archaeologist/demo/express/)
+
 ## Quick start
 
 ```bash
