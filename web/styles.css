@@ -90,7 +90,7 @@ button, input, select { font: inherit; color: inherit; }
 .empty { color: var(--text-muted); font-style: italic; padding: 20px 0; }
 
 /* ---------- entrance ---------- */
-.hero { min-height: 92vh; display: grid; align-content: center; gap: 22px; padding-top: 40px; position: relative; }
+.hero { min-height: min(92vh, 860px); display: grid; align-content: center; gap: 22px; padding-top: 40px; position: relative; }
 .hero::before {
   content: ""; position: absolute; inset: -40px -200px auto; height: 70vh; z-index: -1;
   background: radial-gradient(ellipse at 50% 0%, rgba(217, 180, 90, .13), transparent 65%);
