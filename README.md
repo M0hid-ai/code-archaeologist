@@ -91,10 +91,14 @@ codearch [repo] [options]
       --since <date>     Only commits after this date ("2 years ago", 2021-01-01)
       --ref <rev>        Branch, tag or commit to excavate (default: HEAD)
       --blame-files <n>  Files to excavate with git blame (default: 150)
+  -x, --exclude <glob>   Leave matching paths out of every exhibit (repeatable)
       --json             Also write report.json (the full catalogue)
       --open             Open the museum in your browser when done
   -q, --quiet            Only print the output path
 ```
+
+To keep vendored or generated code out of every exhibit, pass `--exclude 'vendor/'` or commit a
+`.codearchignore` file (gitignore-style globs, one per line) to the repository root.
 
 Append `?wings=graveyard,gallery` to the museum URL to show only some wings (handy for embedding).
 
