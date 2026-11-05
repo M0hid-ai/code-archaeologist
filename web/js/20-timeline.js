@@ -27,9 +27,13 @@ function timelineChart() {
     const x0 = Math.max(m.l, tOf(e.start));
     const x1 = Math.min(m.l + iw, tOf(e.end));
     if (k % 2 === 0) g.push(s("rect", { x: x0, y: m.t - 26, width: Math.max(0, x1 - x0), height: ih + 26, fill: css("--surface-2"), opacity: 0.55 }));
-    if (x1 - x0 > 60) {
-      const label = (R.narrative.eras.find((x2) => x2.id === e.id) || e).title || e.name;
-      g.push(s("text", { x: x0 + 6, y: m.t - 10, class: "era-label" }, label.length * 6.5 > x1 - x0 ? label.slice(0, Math.floor((x1 - x0) / 7)) + "…" : label));
+    const label = (R.narrative.eras.find((x2) => x2.id === e.id) || e).title || e.name;
+    const numeral = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][k] || String(k + 1);
+    const text = x1 - x0 > 60 ? (label.length * 6.5 > x1 - x0 ? label.slice(0, Math.floor((x1 - x0) / 7)) + "…" : label) : x1 - x0 > 14 ? numeral : null;
+    if (text) {
+      const t = s("text", { x: x0 + 6, y: m.t - 10, class: "era-label" }, text);
+      tooltip(t, `<b>${numeral}. ${esc(label)}</b><br>${monthLabel(e.start)} – ${monthLabel(e.end)}`);
+      g.push(t);
     }
   });
   // Grid + axis.
