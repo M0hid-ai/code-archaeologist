@@ -54,8 +54,10 @@ export interface Lifecycle {
  * Replay the history commit by commit, tracking every file from birth
  * (through renames and copies) to death or to the present day.
  * `frameTimes` (ascending) asks for line-count snapshots at those instants.
+ * `seeds` gives starting line counts (by life id) for files that already
+ * existed before the analysed window; see {@link seedLines}.
  */
-export function trackLifecycles(commits: Commit[], frameTimes: number[] = []): Lifecycle {
+export function trackLifecycles(commits: Commit[], frameTimes: number[] = [], seeds?: Map<number, number>): Lifecycle {
   const alive = new Map<string, FileLife>();
   const all: FileLife[] = [];
   const graveByPath = new Map<string, FileLife>();
@@ -73,6 +75,7 @@ export function trackLifecycles(commits: Commit[], frameTimes: number[] = []): L
   };
 
   const create = (path: string, c: Commit, preexisting: boolean): FileLife => {
+    const seed = preexisting ? (seeds?.get(all.length) ?? 0) : 0;
     const life: FileLife = {
       id: all.length,
       path,
@@ -82,8 +85,8 @@ export function trackLifecycles(commits: Commit[], frameTimes: number[] = []): L
       bornHash: c.hash,
       bornSubject: c.subject,
       preexisting,
-      lines: 0,
-      peakLines: 0,
+      lines: seed,
+      peakLines: seed,
       added: 0,
       deleted: 0,
       binary: false,
@@ -175,4 +178,23 @@ export function trackLifecycles(commits: Commit[], frameTimes: number[] = []): L
     all,
     frames,
   };
+}
+
+/**
+ * When history is truncated (--max-commits / --since), files that existed
+ * before the window start at an unknown size. Recover it from the end state:
+ * size at the start = size at HEAD (or 0 if the file died) minus the net
+ * line delta seen inside the window. Life ids are stable between replays of
+ * the same commits, so the result can be fed back into trackLifecycles.
+ */
+export function seedLines(first: Lifecycle, headLines: Map<string, number>): Map<number, number> {
+  const seeds = new Map<number, number>();
+  for (const l of first.all) {
+    if (!l.preexisting || l.binary) continue;
+    const final = l.died ? 0 : (headLines.get(l.path) ?? l.lines);
+    const net = l.added - l.deleted;
+    const seed = final - net;
+    if (seed > 0) seeds.set(l.id, seed);
+  }
+  return seeds;
 }
