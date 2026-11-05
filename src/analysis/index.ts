@@ -142,6 +142,7 @@ export async function analyze(raw: RepoHistory, opts: AnalyzeOptions): Promise<R
     head: h.head,
     maxFiles: opts.blameFiles,
     canonical,
+    onProgress: (done, total) => log(`Excavating survivors with git blame (${done}/${total})`),
   });
 
   log("Filming the timelapse");
