@@ -3,7 +3,7 @@ import type { FileLife, Lifecycle } from "./lifecycle.js";
 import type { Fossil, SurvivorFunction, Survivors } from "./report.js";
 import { blame, type BlameLine } from "../git/blame.js";
 import { findFunctions, supportsFunctions } from "./functions.js";
-import { isNoise, isCode } from "../util/files.js";
+import { isBookkeeping, isCode, isNoise, isTest } from "../util/files.js";
 import { isRefactor } from "../util/messages.js";
 import { hash32 } from "../util/stats.js";
 
@@ -108,10 +108,10 @@ async function pool<T>(items: T[], n: number, fn: (item: T) => Promise<void>): P
 
 /** Excavate the oldest living code: functions, files and sediment layers. */
 export async function buildSurvivors(commits: Commit[], lifecycle: Lifecycle, opts: SurvivorOptions): Promise<Survivors> {
-  const living = lifecycle.alive.filter((l) => !isNoise(l.path));
+  const living = lifecycle.alive.filter((l) => !isNoise(l.path) && !isBookkeeping(l.path));
   const elders = living.filter((l) => !l.preexisting).sort((a, b) => a.born - b.born).slice(0, 15).map(toFossil);
   const fossils = living
-    .filter((l) => l.touches.length > 0)
+    .filter((l) => l.touches.length > 0 && l.lines > 0)
     .sort((a, b) => a.lastTime - b.lastTime)
     .slice(0, 15)
     .map(toFossil);
@@ -134,21 +134,24 @@ export async function buildSurvivors(commits: Commit[], lifecycle: Lifecycle, op
       const year = new Date(l.time * 1000).getUTCFullYear();
       strata.set(year, (strata.get(year) ?? 0) + 1);
     }
-    if (supportsFunctions(life.path)) fns.push(...functionSurvivors(life, lines, commits, opts.canonical));
+    if (supportsFunctions(life.path) && !isTest(life.path)) fns.push(...functionSurvivors(life, lines, commits, opts.canonical));
     opts.onProgress?.(++done, files.length);
   });
 
-  // Rank by battles survived, then age; at most three exhibits per file.
+  // Rank by battles survived, then age. The first pass takes one exhibit per
+  // file so the hall is varied; later passes allow up to three per file.
   fns.sort((a, b) => b.refactorsSurvived - a.refactorsSurvived || b.commitsSurvived - a.commitsSurvived || a.born - b.born);
   const perFile = new Map<string, number>();
   const functions: SurvivorFunction[] = [];
-  for (const f of fns) {
-    if (f.commitsSurvived === 0) continue;
-    const n = perFile.get(f.path) ?? 0;
-    if (n >= 3) continue;
-    perFile.set(f.path, n + 1);
-    functions.push(f);
-    if (functions.length >= 40) break;
+  for (const cap of [1, 3]) {
+    for (const f of fns) {
+      if (functions.length >= 40) break;
+      if (f.commitsSurvived === 0 || functions.includes(f)) continue;
+      const n = perFile.get(f.path) ?? 0;
+      if (n >= cap) continue;
+      perFile.set(f.path, n + 1);
+      functions.push(f);
+    }
   }
 
   return {
