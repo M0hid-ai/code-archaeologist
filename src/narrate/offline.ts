@@ -96,7 +96,7 @@ export function offlineNarrative(r: Report): Narrative {
   const toughest = s.functions[0];
   const placards: Record<string, string> = {
     timeline: `Every bar is a month of work. Coloured bands mark the ${r.eras.length} eras this project lived through; plaques mark the moments that mattered.`,
-    timelapse: `Watch ${o.name} grow from its first file to ${fmt(o.filesAlive)}. Each tile is a file, sized by its line count and grouped by top-level directory. Green tiles are newborn; tiles that vanish have died.`,
+    timelapse: `Watch ${o.name} grow from its first file to ${fmt(o.filesAlive)}. Each tile is a file, sized by its line count and grouped by top-level directory. Outlined tiles are newborn; tiles that shrink away have died. Press play, and turn the sound on.`,
     survivors: toughest
       ? `${toughest.name}() in ${toughest.path} was written by ${toughest.bornBy} on ${isoDate(toughest.born)} and has survived ${fmt(toughest.commitsSurvived)} commits to its file, ${fmt(toughest.refactorsSurvived)} of them refactors.${oldestFn && oldestFn !== toughest ? ` The oldest living definition is ${oldestFn.name}(), dating from ${isoDate(oldestFn.born)}.` : ""}`
       : `The oldest living files of ${o.name}, and the code that has stayed put the longest.`,
