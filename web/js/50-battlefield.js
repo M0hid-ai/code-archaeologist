@@ -19,7 +19,7 @@ function hotspotTable() {
             h("td.num", fmt(x.authors)),
             h("td.num", fmt(x.fixes)),
             h("td.num", fmt(x.lines)),
-            h("td", date(x.lastTouched)),
+            h("td.nowrap", date(x.lastTouched)),
           ),
         ),
       ),
@@ -57,7 +57,7 @@ function revertList() {
         rv.slice(0, 15).map((r) =>
           h(
             "tr",
-            h("td", date(r.t)),
+            h("td.nowrap", date(r.t)),
             h("td", r.by),
             h("td", r.subject),
             h("td", r.original ? duration(r.t - r.original.t) + (r.original.by !== r.by ? ` (undoing ${r.original.by})` : "") : h("span.muted", "unknown")),

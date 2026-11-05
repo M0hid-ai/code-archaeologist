@@ -69,7 +69,7 @@ function fossilTable(rows, mode) {
         h(
           "tr",
           h("td.path-cell", f.path),
-          h("td", mode === "elders" ? date(f.born) : date(f.lastTouched)),
+          h("td.nowrap", mode === "elders" ? date(f.born) : date(f.lastTouched)),
           h("td", f.bornBy),
           h("td.num", fmt(f.commits)),
           h("td.num", fmt(f.lines)),
@@ -93,8 +93,8 @@ Museum.wings.push({
       h(
         "div.grid.cols-2",
         { style: { marginTop: "36px" } },
-        h("div", h("h3.sub", "The Elders"), h("p.muted.small", "The oldest files still alive."), h("div.panel", fossilTable(R.survivors.elders, "elders"))),
-        h("div", h("h3.sub", "Fossils"), h("p.muted.small", "Living files nobody has touched in the longest time."), h("div.panel", fossilTable(R.survivors.fossils, "fossils"))),
+        h("div", h("h3.sub", "The Elders"), h("p.muted.small", "The oldest files still alive."), h("div.panel", fossilTable(R.survivors.elders.slice(0, 8), "elders"))),
+        h("div", h("h3.sub", "Fossils"), h("p.muted.small", "Living files nobody has touched in the longest time."), h("div.panel", fossilTable(R.survivors.fossils.slice(0, 8), "fossils"))),
       ),
     );
   },

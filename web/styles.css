@@ -172,6 +172,8 @@ table.data { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.data th { text-align: left; color: var(--text-muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; padding: 8px 10px; border-bottom: 1px solid var(--rule); }
 table.data td { padding: 8px 10px; border-bottom: 1px solid var(--surface-3); vertical-align: top; }
 table.data td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.data th.num { text-align: right; }
+table.data td.nowrap { white-space: nowrap; }
 table.data tr:hover td { background: var(--surface-2); }
 .path-cell { font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
 .meter { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; min-width: 60px; }
