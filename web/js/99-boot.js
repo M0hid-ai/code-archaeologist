@@ -25,6 +25,7 @@
     "footer.epilogue",
     h("div.wing-kicker", "Epilogue"),
     h("p", R.narrative.epilogue),
+    h("div.colophon", "Press ? for keyboard shortcuts."),
     h(
       "div.colophon",
       `Excavated by code-archaeologist v${R.version} on ${date(Date.parse(R.generatedAt) / 1000)} · ${R.overview.branch} @ ${R.overview.head.slice(0, 10)} · narration: ${
