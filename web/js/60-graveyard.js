@@ -85,7 +85,7 @@ function graveyardStats() {
         h("p.muted.small", "Days when many files died at once."),
         h(
           "div.panel",
-          h("table.data", h("tbody", g.massacres.map((m) => h("tr", h("td", m.day), h("td.num", plural(m.deaths, "file")), h("td", m.by), h("td.muted", m.subject))))),
+          h("table.data", h("thead", h("tr", h("th", "Day"), h("th.num", "Deaths"), h("th", "By"), h("th", "Commit"))), h("tbody", g.massacres.map((m) => h("tr", h("td.nowrap", m.day), h("td.num", fmt(m.deaths)), h("td", m.by), h("td.muted", m.subject))))),
         ),
       ),
     );
@@ -99,7 +99,8 @@ function graveyardStats() {
           "div.panel",
           h(
             "table.data",
-            h("tbody", g.zombies.slice(0, 12).map((z) => h("tr", h("td.path-cell", "🧟 " + z.path), h("td", `buried ${date(z.diedAt)}`), h("td", `rose ${date(z.returnedAt)}`), h("td", z.returnedBy)))),
+            h("thead", h("tr", h("th", "File"), h("th", "Buried"), h("th", "Rose"), h("th", "By"))),
+            h("tbody", g.zombies.slice(0, 12).map((z) => h("tr", h("td.path-cell", "🧟 " + z.path), h("td.nowrap", date(z.diedAt)), h("td.nowrap", date(z.returnedAt)), h("td", z.returnedBy)))),
           ),
         ),
       ),
