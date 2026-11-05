@@ -25,7 +25,7 @@ export function isNoise(path: string): boolean {
 }
 
 const BOOKKEEPING =
-  /(^|\/)(changelog|changes|history|news|releases?|authors|contributors|version)(\.(md|markdown|txt|rst|adoc))?$|(^|\/)(package\.json|pyproject\.toml|setup\.py|setup\.cfg|cargo\.toml|go\.mod|composer\.json|pom\.xml|build\.gradle(\.kts)?|gemfile|\.[\w-]*rc(\.json|\.ya?ml|\.js|\.cjs)?|\.gitignore)$|(^|\/)\.github\//i;
+  /(^|\/)(changelog|changes|history|news|releases?|authors|contributors|version)(\.(md|markdown|txt|rst|adoc))?$|(^|\/)(package\.json|pyproject\.toml|setup\.py|setup\.cfg|cargo\.toml|go\.mod|composer\.json|pom\.xml|build\.gradle(\.kts)?|gemfile|\.[\w-]*rc(\.json|\.ya?ml|\.js|\.cjs)?|\.gitignore|\.gitattributes|\.travis\.yml|appveyor\.yml|azure-pipelines\.yml|\.gitlab-ci\.yml|jenkinsfile|license(\.\w+)?)$|(^|\/)\.(github|circleci)\//i;
 
 /**
  * Release bookkeeping (changelogs, manifests, version files, CI config):

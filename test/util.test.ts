@@ -25,6 +25,9 @@ test("file classification", () => {
   assert.ok(isBookkeeping(".eslintrc.json"));
   assert.ok(!isBookkeeping("lib/history.js"));
   assert.ok(!isBookkeeping("src/router.ts"));
+  assert.ok(isBookkeeping("appveyor.yml"));
+  assert.ok(isBookkeeping(".github/workflows/ci.yml"));
+  assert.ok(isBookkeeping("LICENSE"));
 });
 
 test("commit mood classification", () => {
