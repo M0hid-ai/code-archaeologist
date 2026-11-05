@@ -60,6 +60,7 @@ export function digest(r: Report): unknown {
       workMix: Object.fromEntries(Object.entries(e.moodShare).map(([k, v]) => [k, Math.round((v ?? 0) * 100) + "%"])),
       busiestAreas: e.topDirs,
       releases: e.tags.slice(0, 6),
+      highlights: e.highlights,
     })),
     milestones: r.milestones.map((m) => `${isoDate(m.t)} ${m.title}: ${m.detail}`),
     survivors: r.survivors.functions.slice(0, 6).map((f) => ({
