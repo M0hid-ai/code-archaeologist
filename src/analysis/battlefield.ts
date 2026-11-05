@@ -1,7 +1,7 @@
 import type { Commit } from "../types.js";
 import type { Lifecycle } from "./lifecycle.js";
 import type { Battlefield, Hotspot, Revert, Rivalry } from "./report.js";
-import { isNoise } from "../util/files.js";
+import { isBookkeeping, isNoise } from "../util/files.js";
 import { isFix, revertedSubject } from "../util/messages.js";
 
 const RIVALRY_WINDOW = 30 * 86400;
@@ -16,7 +16,7 @@ export function hotspots(commits: Commit[], lifecycle: Lifecycle, limit = 30): H
   const span = Math.max(1, now - (commits[0]?.time ?? now));
   const list: Hotspot[] = [];
   for (const l of lifecycle.alive) {
-    if (isNoise(l.path) || l.touches.length < 2) continue;
+    if (isNoise(l.path) || isBookkeeping(l.path) || l.touches.length < 2) continue;
     const fixes = l.touches.filter((i) => isFix(commits[i].subject)).length;
     const churn = l.added + l.deleted;
     const recency = 0.5 + 0.5 * (1 - (now - l.lastTime) / span);
