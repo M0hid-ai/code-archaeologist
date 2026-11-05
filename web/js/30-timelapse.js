@@ -220,6 +220,15 @@ function timelapseTheater() {
     h("div.controls", playBtn, scrub, speedSel, soundBtn),
   );
   Museum.timelapse = {
+    element: theater,
+    toggle() {
+      setPlaying(!playing);
+    },
+    step(delta) {
+      setPlaying(false);
+      pos = Math.max(0, Math.min(F - 1, Math.round(pos) + delta));
+      draw();
+    },
     mount() {
       hiDpiCanvas(canvas, (c, w, hh) => {
         ctx = c; W = w; H = hh;
