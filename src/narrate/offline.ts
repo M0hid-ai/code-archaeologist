@@ -68,7 +68,7 @@ export function eraStory(e: Era, r: Report): string {
     );
   }
   if (e.filesBorn || e.filesDied) parts.push(`${fmt(e.filesBorn)} files were born and ${fmt(e.filesDied)} were buried.`);
-  if (e.topDirs.length) parts.push(`Most digging happened in ${list(e.topDirs.map((d) => (d === "(root)" ? "the project root" : `${d}/`)))}.`);
+  if (e.topDirs.length) parts.push(`Most digging happened in ${list(e.topDirs.slice(0, 3).map((d) => (d === "(root)" ? "the project root" : `${d}/`)))}.`);
   if (e.tags.length) parts.push(`Releases shipped: ${list(e.tags, 4)}.`);
   return parts.join(" ");
 }
