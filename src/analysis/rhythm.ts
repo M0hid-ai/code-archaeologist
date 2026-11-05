@@ -19,7 +19,7 @@ export function buildRhythm(commits: Commit[]): Rhythm {
   let weekend = 0;
   let silence: Rhythm["longestSilence"] = null;
 
-  commits.forEach((c, i) => {
+  commits.forEach((c) => {
     heatmap[c.localWeekday][c.localHour]++;
     const mood = classify(c.subject);
     bump(moods, mood);
@@ -33,11 +33,15 @@ export function buildRhythm(commits: Commit[]): Rhythm {
     if (c.localHour < 5) night++;
     if (c.localWeekday === 0 || c.localWeekday === 6) weekend++;
     bump(perDay, dayKey(c.time));
-    if (i > 0) {
-      const gap = c.time - commits[i - 1].time;
-      if (!silence || gap > silence.to - silence.from) silence = { from: commits[i - 1].time, to: c.time, days: Math.round(gap / DAY) };
-    }
   });
+
+  // Author dates are not monotonic in log order (rebases, cherry-picks), so
+  // measure silences on the sorted timeline.
+  const times = commits.map((c) => c.time).sort((a, b) => a - b);
+  for (let i = 1; i < times.length; i++) {
+    const gap = times[i] - times[i - 1];
+    if (!silence || gap > silence.to - silence.from) silence = { from: times[i - 1], to: times[i], days: Math.round(gap / DAY) };
+  }
 
   const busiest = top(perDay, 1)[0];
   const n = Math.max(1, commits.length);
