@@ -36,3 +36,21 @@ test("readHistory honours maxCommits", async () => {
     repo.cleanup();
   }
 });
+
+test("truncated histories recover real sizes from HEAD", async () => {
+  const { analyze } = await import("../src/analysis/index.js");
+  const { countLines } = await import("../src/git/lines.js");
+  const repo = storyRepo();
+  try {
+    const full = await analyze(await readHistory(repo.dir), { repoDir: repo.dir });
+    const cut = await analyze(await readHistory(repo.dir, { maxCommits: 3 }), { repoDir: repo.dir, truncated: true });
+    assert.equal(cut.overview.linesAlive, full.overview.linesAlive);
+    assert.equal(cut.overview.filesAlive, full.overview.filesAlive);
+    assert.equal(cut.eras[0].name, "The Excavation Begins");
+    const counts = await countLines(repo.dir, "HEAD");
+    assert.equal(counts.get("README.md"), 1);
+    assert.equal(counts.get("lib/utils.js"), 31);
+  } finally {
+    repo.cleanup();
+  }
+});
