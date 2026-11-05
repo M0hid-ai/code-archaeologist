@@ -111,7 +111,13 @@ function eraCards() {
       return h(
         "article.card.era.reveal",
         h("div", h("div.when", monthLabel(e.start)), h("div.when", "to " + monthLabel(e.end)), h("div.when", duration(e.end - e.start))),
-        h("div", h("h3", (nar && nar.title) || e.name), h("p.story", (nar && nar.story) || ""), h("div.facts", facts)),
+        h(
+          "div",
+          h("h3", (nar && nar.title) || e.name),
+          h("p.story", (nar && nar.story) || ""),
+          h("div.facts", facts),
+          e.highlights && e.highlights.length ? h("ul.highlights", e.highlights.map((x) => h("li", x))) : null,
+        ),
       );
     }),
   );

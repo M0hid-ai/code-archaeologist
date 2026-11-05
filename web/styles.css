@@ -133,6 +133,8 @@ details.table-view summary { cursor: pointer; color: var(--text-muted); }
 .era h3 { font-size: 24px; }
 .era .story { font-family: var(--serif); font-size: 17px; color: var(--text-secondary); margin: 6px 0 10px; }
 .era .facts { display: flex; flex-wrap: wrap; gap: 6px; }
+.era .highlights { margin: 12px 0 0; padding-left: 18px; color: var(--text-muted); font-size: 13px; }
+.era .highlights li { margin: 2px 0; }
 .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface-2); border: 1px solid var(--rule); color: var(--text-secondary); border-radius: 999px; padding: 2px 10px; font-size: 12px; }
 .chip.gold { color: var(--gold); border-color: var(--gold-dim); }
 @media (max-width: 700px) { .era { grid-template-columns: 1fr; } }
