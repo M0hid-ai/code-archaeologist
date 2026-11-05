@@ -1,7 +1,7 @@
 import type { Commit } from "../types.js";
 import type { Lifecycle } from "./lifecycle.js";
 import type { Coupling } from "./report.js";
-import { isNoise, topDir } from "../util/files.js";
+import { isBookkeeping, isNoise, topDir } from "../util/files.js";
 
 export interface CouplingOptions {
   /** Ignore commits touching more files than this (mass renames, formatting). */
@@ -29,7 +29,7 @@ export function buildCouplings(commits: Commit[], lifecycle: Lifecycle, opts: Co
   const perCommit = new Map<number, number[]>();
   const lifeCommits = new Map<number, number>();
   for (const l of lifecycle.all) {
-    if (isNoise(l.path) || l.touches.length < minCommits) continue;
+    if (isNoise(l.path) || isBookkeeping(l.path) || l.touches.length < minCommits) continue;
     lifeCommits.set(l.id, l.touches.length);
     for (const i of l.touches) {
       let arr = perCommit.get(i);
