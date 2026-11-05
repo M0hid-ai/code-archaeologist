@@ -5,7 +5,8 @@ import { buildContributors } from "./contributors.js";
 import { buildCouplings } from "./coupling.js";
 import { buildGraveyard } from "./graveyard.js";
 import { canonicalAuthors } from "./identity.js";
-import { trackLifecycles } from "./lifecycle.js";
+import { seedLines, trackLifecycles } from "./lifecycle.js";
+import { countLines } from "../git/lines.js";
 import { buildMilestones } from "./milestones.js";
 import { buildRhythm } from "./rhythm.js";
 import { buildSurvivors } from "./survivors.js";
@@ -24,7 +25,13 @@ export interface AnalyzeOptions {
   log?: (msg: string) => void;
 }
 
-function overview(h: RepoHistory, lc: ReturnType<typeof trackLifecycles>, contributors: number, truncated: boolean): Overview {
+function overview(
+  h: RepoHistory,
+  lc: ReturnType<typeof trackLifecycles>,
+  contributors: number,
+  truncated: boolean,
+  headLines?: Map<string, number>,
+): Overview {
   const commits = h.commits;
   let added = 0;
   let deleted = 0;
@@ -48,6 +55,14 @@ function overview(h: RepoHistory, lc: ReturnType<typeof trackLifecycles>, contri
     e.lines += l.lines;
     langs.set(name, e);
   }
+  // With a truncated window, files untouched inside it never enter the
+  // replay; the HEAD tree is the exact source for what is alive today.
+  let filesAlive = alive.length;
+  if (headLines) {
+    const real = [...headLines.entries()].filter(([p]) => !isNoise(p));
+    filesAlive = real.length;
+    linesAlive = real.reduce((a, [, n]) => a + n, 0);
+  }
   return {
     name: h.name,
     branch: h.branch,
@@ -57,7 +72,7 @@ function overview(h: RepoHistory, lc: ReturnType<typeof trackLifecycles>, contri
     commits: commits.length,
     merges,
     contributors,
-    filesAlive: alive.length,
+    filesAlive,
     filesDead: lc.dead.filter((l) => !isNoise(l.path)).length,
     linesAlive,
     linesAdded: added,
@@ -93,11 +108,18 @@ export async function analyze(raw: RepoHistory, opts: AnalyzeOptions): Promise<R
 
   log("Replaying file lifecycles");
   const windows = frameWindows(commits);
-  const lc = trackLifecycles(commits, windows.ends);
+  let lc = trackLifecycles(commits, windows.ends);
+  let headLines: Map<string, number> | undefined;
+  if (lc.all.some((l) => l.preexisting)) {
+    // Truncated history: replay again with true starting sizes.
+    log("Measuring files that predate the excavation window");
+    headLines = await countLines(opts.repoDir, h.head);
+    lc = trackLifecycles(commits, windows.ends, seedLines(lc, headLines));
+  }
 
   log("Charting the timeline and eras");
   const months = monthlySeries(commits);
-  const eras = buildEras(commits, months, h.tags, lc);
+  const eras = buildEras(commits, months, h.tags, lc, truncated);
 
   log("Digging the graveyard");
   const graveyard = buildGraveyard(commits, lc);
@@ -128,7 +150,7 @@ export async function analyze(raw: RepoHistory, opts: AnalyzeOptions): Promise<R
   const report: Report = {
     version: VERSION,
     generatedAt: new Date().toISOString(),
-    overview: overview(h, lc, people.list.length + people.others, truncated),
+    overview: overview(h, lc, people.list.length + people.others, truncated, headLines),
     months,
     eras,
     milestones: buildMilestones(commits, h.tags, lc, truncated),
