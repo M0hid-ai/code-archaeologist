@@ -179,6 +179,17 @@ async function askClaude(prompt: string, model: string): Promise<string> {
   return text;
 }
 
+/** Pull the human-readable message out of a Google API error body. */
+export function apiErrorMessage(body: string): string {
+  try {
+    const parsed = JSON.parse(body) as { error?: { message?: string; status?: string } };
+    if (parsed.error?.message) return [parsed.error.status, parsed.error.message].filter(Boolean).join(": ").slice(0, 200);
+  } catch {
+    /* not JSON */
+  }
+  return body.replace(/\s+/g, " ").slice(0, 200);
+}
+
 async function askGemini(prompt: string, model: string): Promise<string> {
   const key = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY is not set");
@@ -191,7 +202,7 @@ async function askGemini(prompt: string, model: string): Promise<string> {
       generationConfig: { responseMimeType: "application/json", temperature: 0.8 },
     }),
   });
-  if (!res.ok) throw new Error(`Gemini API ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  if (!res.ok) throw new Error(`Gemini API ${res.status}: ${apiErrorMessage(await res.text())}`);
   const data = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
   if (!text) throw new Error("Gemini returned no text");

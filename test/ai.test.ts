@@ -60,3 +60,10 @@ test("buildPrompt embeds a compact digest without emails", async () => {
     repo.cleanup();
   }
 });
+
+test("apiErrorMessage condenses Google error bodies", async () => {
+  const { apiErrorMessage } = await import("../src/narrate/ai.js");
+  const body = JSON.stringify({ error: { code: 401, message: "Request had invalid authentication credentials.", status: "UNAUTHENTICATED" } });
+  assert.equal(apiErrorMessage(body), "UNAUTHENTICATED: Request had invalid authentication credentials.");
+  assert.equal(apiErrorMessage("plain\n  text"), "plain text");
+});
