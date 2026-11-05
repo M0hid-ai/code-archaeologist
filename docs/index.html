@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code Archaeologist</title>
+<meta name="description" content="Dig up the hidden history of any git repository and exhibit it as an explorable web museum.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%BA%3C/text%3E%3C/svg%3E">
+<style>
+  :root { color-scheme: dark; --page:#121211; --surface:#1a1a19; --rule:#383835; --ink:#f0efec; --ink2:#c3c2b7; --muted:#8f8e86; --gold:#d9b45a;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --mono:ui-monospace,"Cascadia Code",Menlo,Consolas,monospace; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font:17px/1.6 var(--sans); }
+  main { max-width: 1040px; margin: 0 auto; padding: 12vh 24px 80px; }
+  .kicker { color:var(--gold); letter-spacing:.3em; text-transform:uppercase; font-size:13px; }
+  h1 { font-family:var(--serif); font-size:clamp(44px,8vw,92px); line-height:1; margin:14px 0 18px; }
+  p.lead { font-family:var(--serif); font-size:22px; color:var(--ink2); max-width:720px; }
+  pre { background:var(--surface); border:1px solid var(--rule); border-radius:10px; padding:16px 18px; overflow-x:auto; font:14px/1.6 var(--mono); color:var(--ink2); }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin:36px 0; }
+  a.card { display:block; text-decoration:none; color:inherit; background:var(--surface); border:1px solid var(--rule); border-radius:12px; overflow:hidden; transition:transform .2s, border-color .2s; }
+  a.card:hover { transform:translateY(-3px); border-color:var(--gold); }
+  a.card img { display:block; width:100%; aspect-ratio:16/10; object-fit:cover; object-position:top; border-bottom:1px solid var(--rule); }
+  a.card div { padding:14px 16px; }
+  a.card h2 { font-family:var(--serif); font-size:22px; margin:0 0 4px; }
+  a.card p { margin:0; color:var(--muted); font-size:14px; }
+  .links a { color:var(--gold); margin-right:18px; }
+  footer { color:var(--muted); font-size:13px; margin-top:60px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">🏺 Code Archaeologist</div>
+  <h1>Every repository is a dig site.</h1>
+  <p class="lead">Point it at any git repository and it reconstructs the story of the codebase: eras, survivors, graveyards, battlefields and a timelapse of the whole thing growing. The result is one self-contained web page.</p>
+  <div class="cards">
+    <a class="card" href="demo/express/">
+      <img src="https://raw.githubusercontent.com/M0hid-ai/code-archaeologist/main/docs/screenshots/timelapse.png" alt="Timelapse of the Express.js codebase">
+      <div><h2>The Museum of Express</h2><p>17 years, 6,000+ commits, 380+ contributors, 500+ graves.</p></div>
+    </a>
+    <a class="card" href="demo/self/">
+      <img src="https://raw.githubusercontent.com/M0hid-ai/code-archaeologist/main/docs/screenshots/graveyard.png" alt="Graveyard exhibit">
+      <div><h2>The Museum of Itself</h2><p>Code Archaeologist excavating its own (very young) history.</p></div>
+    </a>
+  </div>
+  <pre>git clone https://github.com/M0hid-ai/code-archaeologist
+cd code-archaeologist &amp;&amp; npm install &amp;&amp; npm run build
+node dist/src/bin.js https://github.com/your/repo --open</pre>
+  <p class="links"><a href="https://github.com/M0hid-ai/code-archaeologist">Source on GitHub</a><a href="https://github.com/M0hid-ai/code-archaeologist#readme">Documentation</a></p>
+  <footer>MIT licensed. Museums are generated entirely offline; optional AI narration sends only aggregate statistics.</footer>
+</main>
+</body>
+</html>
