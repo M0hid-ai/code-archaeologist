@@ -245,6 +245,8 @@ export interface Report {
   version: string;
   generatedAt: string;
   overview: Overview;
+  /** Bucket size of `months`: hour, day or month depending on the history's length. */
+  seriesUnit: "hour" | "day" | "month";
   months: MonthPoint[];
   eras: Era[];
   milestones: Milestone[];

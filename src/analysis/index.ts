@@ -11,7 +11,7 @@ import { buildMilestones } from "./milestones.js";
 import { buildRhythm } from "./rhythm.js";
 import { buildSurvivors } from "./survivors.js";
 import { buildTimelapse, frameWindows } from "./timelapse.js";
-import { buildEras, monthlySeries } from "./timeline.js";
+import { buildEras, monthlySeries, seriesUnit } from "./timeline.js";
 import { isNoise, language } from "../util/files.js";
 import { classify } from "../util/messages.js";
 import { offlineNarrative } from "../narrate/offline.js";
@@ -118,8 +118,9 @@ export async function analyze(raw: RepoHistory, opts: AnalyzeOptions): Promise<R
   }
 
   log("Charting the timeline and eras");
-  const months = monthlySeries(commits);
-  const eras = buildEras(commits, months, h.tags, lc, truncated);
+  const unit = seriesUnit(commits);
+  const months = monthlySeries(commits, unit);
+  const eras = buildEras(commits, months, h.tags, lc, truncated, unit);
 
   log("Digging the graveyard");
   const graveyard = buildGraveyard(commits, lc);
@@ -152,6 +153,7 @@ export async function analyze(raw: RepoHistory, opts: AnalyzeOptions): Promise<R
     version: VERSION,
     generatedAt: new Date().toISOString(),
     overview: overview(h, lc, people.list.length + people.others, truncated, headLines),
+    seriesUnit: unit,
     months,
     eras,
     milestones: buildMilestones(commits, h.tags, lc, truncated),
