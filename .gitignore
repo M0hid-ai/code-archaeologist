@@ -1,0 +1,7 @@
+node_modules/
+dist/
+museum/
+*.log
+.DS_Store
+coverage/
+.env
