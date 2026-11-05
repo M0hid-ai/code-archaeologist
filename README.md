@@ -3,7 +3,7 @@
 > Dig up the hidden history of any git repository and exhibit it as an explorable web museum.
 
 [![CI](https://github.com/M0hid-ai/code-archaeologist/actions/workflows/ci.yml/badge.svg)](https://github.com/M0hid-ai/code-archaeologist/actions/workflows/ci.yml)
-![node](https://img.shields.io/badge/node-%E2%89%A520-3987e5)
+![node](https://img.shields.io/badge/node-%E2%89%A522-3987e5)
 ![license](https://img.shields.io/badge/license-MIT-d9b45a)
 
 Point it at a repository and it reconstructs the story of the codebase: the eras it lived
