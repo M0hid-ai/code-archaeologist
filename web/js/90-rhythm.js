@@ -16,7 +16,7 @@ function heatmap() {
     g.push(s("text", { x: left - 8, y: top + row * (cell + gap) + cell / 2 + 4, "text-anchor": "end" }, DAYS[d]));
     for (let hr = 0; hr < 24; hr++) {
       const v = hm[d][hr];
-      const k = v ? 1 + Math.round(Math.sqrt(v / max) * (ramp.length - 2)) : 0;
+      const k = v ? 1 + Math.round((v / max) * (ramp.length - 2)) : 0;
       const r = s("rect", { x: left + hr * (cell + gap), y: top + row * (cell + gap), width: cell, height: cell, rx: 4, fill: ramp[k] });
       tooltip(r, `<b>${DAYS[d]} ${String(hr).padStart(2, "0")}:00–${String(hr).padStart(2, "0")}:59</b>${ttRow("Commits", fmt(v))}`);
       g.push(r);
