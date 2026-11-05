@@ -5,7 +5,7 @@ import { isBot } from "./identity.js";
 import { isDoc, isNoise, isTest, topDir } from "../util/files.js";
 import { classify, type Mood } from "../util/messages.js";
 import { bump, downsample, top } from "../util/stats.js";
-import { dayKey, monthStart, monthsBetween, DAY } from "../util/time.js";
+import { bucketStart, bucketsBetween, dayKey, unitFor, DAY } from "../util/time.js";
 
 interface Acc {
   name: string;
@@ -74,13 +74,21 @@ export function buildContributors(commits: Commit[], lifecycle: Lifecycle, limit
     return a;
   };
 
+  // Loop rather than Math.min(...) so huge histories cannot overflow the stack.
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const c of commits) {
+    if (c.time < lo) lo = c.time;
+    if (c.time > hi) hi = c.time;
+  }
+  const unit = commits.length ? unitFor(lo, hi) : "month";
   for (const c of commits) {
     const a = get(c.author, c.time);
     a.commits++;
     a.last = c.time;
     a.days.add(dayKey(c.time));
     bump(a.moods, classify(c.subject));
-    bump(a.monthly, monthStart(c.time));
+    bump(a.monthly, bucketStart(c.time, unit));
     if (c.localHour < 5) a.night++;
     else if (c.localHour < 9) a.early++;
     if (c.localWeekday === 0 || c.localWeekday === 6) a.weekend++;
@@ -100,7 +108,7 @@ export function buildContributors(commits: Commit[], lifecycle: Lifecycle, limit
     if (l.died && accs.has(l.died.by)) accs.get(l.died.by)!.filesDeleted++;
   }
 
-  const months = commits.length ? monthsBetween(commits[0].time, commits[commits.length - 1].time) : [];
+  const months = commits.length ? bucketsBetween(lo, hi, unit) : [];
   const sorted = [...accs.values()].sort((x, y) => y.commits - x.commits);
   const ctx = {
     founder: commits[0]?.author ?? "",
