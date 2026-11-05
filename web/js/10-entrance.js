@@ -25,7 +25,13 @@ Museum.wings.push({
         [
           [fmt(o.commits), "commits"],
           [fmt(o.contributors), o.contributors === 1 ? "contributor" : "contributors"],
-          [years >= 1 ? years.toFixed(1) : Math.max(1, Math.round(years * 365)), years >= 1 ? "years of history" : "days of history"],
+          (() => {
+            const secs = o.lastCommit - o.firstCommit;
+            if (years >= 1) return [years.toFixed(1), "years of history"];
+            if (secs >= 2 * 86400) return [Math.round(secs / 86400), "days of history"];
+            if (secs >= 2 * 3600) return [Math.round(secs / 3600), "hours of history"];
+            return [Math.max(1, Math.round(secs / 60)), "minutes of history"];
+          })(),
           [compact(o.linesAlive), "lines alive"],
           [fmt(o.filesDead), "files buried"],
           [fmt(o.tags), o.tags === 1 ? "release tag" : "release tags"],
