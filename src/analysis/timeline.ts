@@ -121,12 +121,19 @@ const QUIET_NAMES = ["The Long Silence", "The Quiet Years", "The Dormancy", "The
 const GENERIC_NAMES = ["The Middle Ages", "The Industrial Age", "The Steady Years", "The Age of Maintenance", "The Long March", "The Modern Era"];
 
 /** Give each era a name based on what actually happened during it. */
-export function nameEra(e: Omit<Era, "name" | "highlights">, prev: Era | undefined, isFirst: boolean, isLast: boolean, used: Set<string>): string {
+export function nameEra(
+  e: Omit<Era, "name" | "highlights">,
+  prev: Era | undefined,
+  isFirst: boolean,
+  isLast: boolean,
+  used: Set<string>,
+  truncated = false,
+): string {
   const months = Math.max(1, (e.end - e.start) / (30.4 * 86400));
   const perMonth = e.commits / months;
   const share = (m: Mood) => e.moodShare[m] ?? 0;
   const candidates: string[] = [];
-  if (isFirst) candidates.push("The Founding");
+  if (isFirst) candidates.push(truncated ? "The Excavation Begins" : "The Founding");
   if (e.commits === 0 || perMonth < 0.5) candidates.push(...QUIET_NAMES);
   if (prev && (prev.commits === 0 || prev.commits / Math.max(1, (prev.end - prev.start) / (30.4 * 86400)) < 0.5) && e.commits > 0)
     candidates.push("The Renaissance");
@@ -162,7 +169,7 @@ function roman(n: number): string {
 }
 
 /** Build fully described eras from the series, commits and file lifecycles. */
-export function buildEras(commits: Commit[], months: MonthPoint[], tags: Tag[], lifecycle: Lifecycle): Era[] {
+export function buildEras(commits: Commit[], months: MonthPoint[], tags: Tag[], lifecycle: Lifecycle, truncated = false): Era[] {
   const segs = segmentEras(months, commits.length);
   const firstSeen = new Map<string, number>();
   const lastSeen = new Map<string, number>();
@@ -226,7 +233,7 @@ export function buildEras(commits: Commit[], months: MonthPoint[], tags: Tag[], 
       topDirs: top(dirs, 4).map(([d]) => d),
       tags: tags.filter((t) => t.time >= start && t.time <= end).map((t) => t.name),
     };
-    const name = nameEra(base, eras[k - 1], k === 0, k === segs.length - 1 && segs.length > 1, used);
+    const name = nameEra(base, eras[k - 1], k === 0, k === segs.length - 1 && segs.length > 1, used, truncated);
     eras.push({ ...base, name, highlights: [] });
   });
   return eras;
