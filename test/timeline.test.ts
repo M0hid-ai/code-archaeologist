@@ -57,3 +57,17 @@ test("nameEra reads the room", () => {
   const taken = new Set(["The Bug Wars"]);
   assert.equal(nameEra({ ...base, moodShare: { fix: 0.5 } }, undefined, false, false, taken), "The Firefighting Years");
 });
+
+test("eraHighlights names the biggest commit and busiest day", async () => {
+  const { eraHighlights } = await import("../src/analysis/timeline.js");
+  const day = at(2021, 5, 4);
+  const commits = [
+    commit("a", day - 86400 * 30, "Start the thing", [["A", "a.js", 3]]),
+    ...Array.from({ length: 5 }, (_, i) => commit("b", day + i * 60, `tweak ${i}`, [["M", "a.js", 1, 1]])),
+    commit("c", day + 86400, "Import the world", [["A", "w.js", 900]]),
+  ];
+  const hl = eraHighlights(commits);
+  assert.ok(hl[0].includes("Import the world") && hl[0].includes("900"));
+  assert.ok(hl.some((x) => x.includes("2021-05-04") && x.includes("5 commits")));
+  assert.ok(hl.some((x) => x.includes("Start the thing")));
+});

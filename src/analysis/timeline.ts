@@ -2,7 +2,7 @@ import type { Commit, Tag } from "../types.js";
 import type { Era, MonthPoint } from "./report.js";
 import type { Lifecycle } from "./lifecycle.js";
 import { classify, type Mood } from "../util/messages.js";
-import { monthStart, monthsBetween, nextMonth } from "../util/time.js";
+import { dayKey, isoDate, monthStart, monthsBetween, nextMonth } from "../util/time.js";
 import { bump, top } from "../util/stats.js";
 import { isNoise, topDir } from "../util/files.js";
 
@@ -234,7 +234,30 @@ export function buildEras(commits: Commit[], months: MonthPoint[], tags: Tag[], 
       tags: tags.filter((t) => t.time >= start && t.time <= end).map((t) => t.name),
     };
     const name = nameEra(base, eras[k - 1], k === 0, k === segs.length - 1 && segs.length > 1, used, truncated);
-    eras.push({ ...base, name, highlights: [] });
+    eras.push({ ...base, name, highlights: eraHighlights(inEra) });
   });
   return eras;
+}
+
+/** One-line facts for an era card: its biggest commit and its busiest day. */
+export function eraHighlights(inEra: Commit[]): string[] {
+  const out: string[] = [];
+  let biggest: { c: Commit; churn: number } | null = null;
+  const perDay = new Map<string, number>();
+  for (const c of inEra) {
+    bump(perDay, dayKey(c.time));
+    if (c.parents.length > 1) continue;
+    let churn = 0;
+    for (const f of c.files) if (!isNoise(f.path)) churn += Math.max(0, f.added) + Math.max(0, f.deleted);
+    if (!biggest || churn > biggest.churn) biggest = { c, churn };
+  }
+  if (biggest && biggest.churn > 0) {
+    const subject = biggest.c.subject.length > 80 ? biggest.c.subject.slice(0, 79) + "…" : biggest.c.subject;
+    out.push(`Biggest commit: "${subject}" by ${biggest.c.author} (${biggest.churn.toLocaleString("en")} lines)`);
+  }
+  const busiest = top(perDay, 1)[0];
+  if (busiest && busiest[1] >= 5) out.push(`Busiest day: ${busiest[0]}, with ${busiest[1]} commits`);
+  const first = inEra.find((c) => c.parents.length <= 1);
+  if (first && inEra.length > 1) out.push(`Opened on ${isoDate(first.time)} with "${first.subject.length > 60 ? first.subject.slice(0, 59) + "…" : first.subject}"`);
+  return out;
 }
