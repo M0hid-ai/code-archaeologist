@@ -24,6 +24,18 @@ export function isNoise(path: string): boolean {
   return NOISE_PATTERNS.some((re) => re.test(path));
 }
 
+const BOOKKEEPING =
+  /(^|\/)(changelog|changes|history|news|releases?|authors|contributors|version)(\.(md|markdown|txt|rst|adoc))?$|(^|\/)(package\.json|pyproject\.toml|setup\.py|setup\.cfg|cargo\.toml|go\.mod|composer\.json|pom\.xml|build\.gradle(\.kts)?|gemfile|\.[\w-]*rc(\.json|\.ya?ml|\.js|\.cjs)?|\.gitignore)$|(^|\/)\.github\//i;
+
+/**
+ * Release bookkeeping (changelogs, manifests, version files, CI config):
+ * touched by every release, so it dominates hotspot and coupling rankings
+ * without telling a story about the code itself.
+ */
+export function isBookkeeping(path: string): boolean {
+  return BOOKKEEPING.test(path);
+}
+
 const LANGUAGES: Record<string, string> = {
   ts: "TypeScript", tsx: "TypeScript", mts: "TypeScript", cts: "TypeScript",
   js: "JavaScript", jsx: "JavaScript", mjs: "JavaScript", cjs: "JavaScript",

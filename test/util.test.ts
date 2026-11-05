@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { isCode, isDoc, isNoise, isTest, language, topDir } from "../src/util/files.js";
+import { isBookkeeping, isCode, isDoc, isNoise, isTest, language, topDir } from "../src/util/files.js";
 import { classify, isLazyMessage, isRefactor, revertedSubject } from "../src/util/messages.js";
 import { downsample, hash32, median, pick } from "../src/util/stats.js";
 import { humanDuration, monthKey, monthsBetween } from "../src/util/time.js";
@@ -19,6 +19,12 @@ test("file classification", () => {
   assert.ok(isDoc("docs/intro.md"));
   assert.equal(topDir("src/a/b.ts"), "src");
   assert.equal(topDir("README.md"), "(root)");
+  assert.ok(isBookkeeping("History.md"));
+  assert.ok(isBookkeeping("CHANGELOG.md"));
+  assert.ok(isBookkeeping("packages/a/package.json"));
+  assert.ok(isBookkeeping(".eslintrc.json"));
+  assert.ok(!isBookkeeping("lib/history.js"));
+  assert.ok(!isBookkeeping("src/router.ts"));
 });
 
 test("commit mood classification", () => {
