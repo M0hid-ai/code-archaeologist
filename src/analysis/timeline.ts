@@ -2,19 +2,40 @@ import type { Commit, Tag } from "../types.js";
 import type { Era, MonthPoint } from "./report.js";
 import type { Lifecycle } from "./lifecycle.js";
 import { classify, type Mood } from "../util/messages.js";
-import { dayKey, isoDate, monthStart, monthsBetween, nextMonth } from "../util/time.js";
+import { bucketStart, bucketsBetween, dayKey, isoDate, nextBucket, unitFor, type Unit } from "../util/time.js";
 import { bump, top } from "../util/stats.js";
 import { isNoise, topDir } from "../util/files.js";
 
-/** Commits, churn, authors and moods for every month of the project's life. */
-export function monthlySeries(commits: Commit[]): MonthPoint[] {
+/** The series unit that suits this history (hours for a weekend hack, months for a decade). */
+export function seriesUnit(commits: Commit[]): Unit {
+  if (commits.length === 0) return "month";
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const c of commits) {
+    if (c.time < lo) lo = c.time;
+    if (c.time > hi) hi = c.time;
+  }
+  return unitFor(lo, hi);
+}
+
+/**
+ * Commits, churn, authors and moods for every bucket (month by default) of
+ * the project's life. Empty buckets are kept so gaps show up as gaps.
+ */
+export function monthlySeries(commits: Commit[], unit: Unit = "month"): MonthPoint[] {
   if (commits.length === 0) return [];
-  const months = monthsBetween(commits[0].time, commits[commits.length - 1].time);
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const c of commits) {
+    if (c.time < lo) lo = c.time;
+    if (c.time > hi) hi = c.time;
+  }
+  const months = bucketsBetween(lo, hi, unit);
   const index = new Map(months.map((m, i) => [m, i]));
   const points: MonthPoint[] = months.map((t) => ({ t, commits: 0, added: 0, deleted: 0, authors: 0, moods: {} }));
   const authors = months.map(() => new Set<string>());
   for (const c of commits) {
-    const i = index.get(monthStart(c.time));
+    const i = index.get(bucketStart(c.time, unit));
     if (i === undefined) continue;
     const p = points[i];
     p.commits++;
@@ -169,7 +190,14 @@ function roman(n: number): string {
 }
 
 /** Build fully described eras from the series, commits and file lifecycles. */
-export function buildEras(commits: Commit[], months: MonthPoint[], tags: Tag[], lifecycle: Lifecycle, truncated = false): Era[] {
+export function buildEras(
+  commits: Commit[],
+  months: MonthPoint[],
+  tags: Tag[],
+  lifecycle: Lifecycle,
+  truncated = false,
+  unit: Unit = "month",
+): Era[] {
   const segs = segmentEras(months, commits.length);
   const firstSeen = new Map<string, number>();
   const lastSeen = new Map<string, number>();
@@ -184,7 +212,7 @@ export function buildEras(commits: Commit[], months: MonthPoint[], tags: Tag[], 
   const used = new Set<string>();
   segs.forEach((s, k) => {
     const start = months[s.from].t;
-    const end = nextMonth(months[s.to].t) - 1;
+    const end = nextBucket(months[s.to].t, unit) - 1;
     const inEra = commits.filter((c) => c.time >= start && c.time <= end);
     const authors = new Map<string, number>();
     const dirs = new Map<string, number>();

@@ -71,3 +71,16 @@ test("eraHighlights names the biggest commit and busiest day", async () => {
   assert.ok(hl.some((x) => x.includes("2021-05-04") && x.includes("5 commits")));
   assert.ok(hl.some((x) => x.includes("Start the thing")));
 });
+
+test("the series unit adapts to the length of the history", async () => {
+  const { seriesUnit } = await import("../src/analysis/timeline.js");
+  const t0 = at(2024, 3, 1, 9);
+  const hack = [commit("a", t0, "start"), commit("a", t0 + 5 * 3600, "more"), commit("a", t0 + 9 * 3600, "done")];
+  assert.equal(seriesUnit(hack), "hour");
+  const series = monthlySeries(hack, "hour");
+  assert.equal(series.length, 10);
+  assert.equal(series[0].commits, 1);
+  assert.equal(series[5].commits, 1);
+  assert.equal(seriesUnit([commit("a", t0, "x"), commit("a", t0 + 30 * 86400, "y")]), "day");
+  assert.equal(seriesUnit([commit("a", t0, "x"), commit("a", t0 + 400 * 86400, "y")]), "month");
+});
