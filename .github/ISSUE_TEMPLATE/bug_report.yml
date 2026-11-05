@@ -1,0 +1,26 @@
+name: Bug report
+description: Something in the museum is broken or wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Which wing, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: input
+    id: repo
+    attributes:
+      label: Repository excavated
+      description: A public URL if you can share it, or its size (commits, files).
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      placeholder: codearch . --since "2 years ago"
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "codearch --version, node --version, git --version, OS, browser"
