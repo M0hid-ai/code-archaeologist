@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Live demo
+    url: https://m0hid-ai.github.io/code-archaeologist/
+    about: See a full museum before filing an issue.
