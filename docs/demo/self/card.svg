@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="190" viewBox="0 0 520 190" role="img" aria-label="code-archaeologist: 137 commits, 1 contributors, 0 files buried">
+  <defs>
+    <radialGradient id="glow" cx="20%" cy="0%" r="90%">
+      <stop offset="0" stop-color="#d9b45a" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#d9b45a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="520" height="190" rx="14" fill="#121211"/>
+  <rect width="520" height="190" rx="14" fill="url(#glow)"/>
+  <rect x=".5" y=".5" width="519" height="189" rx="13.5" fill="none" stroke="#383835"/>
+  <text x="24" y="34" fill="#d9b45a" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="11" letter-spacing="2.5">🏺 A MUSEUM OF CODE HISTORY</text>
+  <text x="24" y="72" fill="#f0efec" font-family="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif" font-size="32" font-weight="600">code-archaeologist</text>
+  <text x="24" y="118" fill="#f0efec" font-family="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif" font-size="24">61 minutes</text>
+  <text x="24" y="136" fill="#8f8e86" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="11">of history</text>
+  <text x="142" y="118" fill="#f0efec" font-family="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif" font-size="24">137</text>
+  <text x="142" y="136" fill="#8f8e86" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="11">commits</text>
+  <text x="260" y="118" fill="#f0efec" font-family="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif" font-size="24">1</text>
+  <text x="260" y="136" fill="#8f8e86" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="11">contributor</text>
+  <text x="378" y="118" fill="#f0efec" font-family="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif" font-size="24">0</text>
+  <text x="378" y="136" fill="#8f8e86" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="11">files buried</text>
+  <line x1="24" y1="154" x2="496" y2="154" stroke="#383835"/>
+  <text x="24" y="174" fill="#c3c2b7" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif" font-size="12">Toughest survivor: monthlySeries() · 3 commits, 0 refactors</text>
+</svg>
