@@ -128,12 +128,14 @@ function timelapseTheater() {
     const fr = T.frames[a];
     dateEl.textContent = monthLabel(T.frames[Math.round(pos)].t);
     statsEl.replaceChildren(
+      ...[
       h("span", h("b", compact(fr.totalLines)), " lines"),
       h("span", h("b", fmt(fr.totalFiles)), " files"),
       h("span", h("b", fmt(fr.commits)), " commits this period"),
       fr.born ? h("span.add", "+" + fmt(fr.born) + " born") : null,
       fr.died ? h("span.del", "−" + fmt(fr.died) + " died") : null,
       fr.authors.length ? h("span", "by ", h("b", fr.authors.join(", "))) : null,
+      ].filter(Boolean),
     );
     scrub.value = pos;
   }
