@@ -28,6 +28,15 @@ const compact = (n) =>
 const date = (t) => new Date(t * 1000).toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
 const monthLabel = (t) => new Date(t * 1000).toLocaleDateString("en", { year: "numeric", month: "short", timeZone: "UTC" });
 const year = (t) => new Date(t * 1000).getUTCFullYear();
+/** Label for one bucket of the activity series (unit chosen by the analysis). */
+const UNIT = R.seriesUnit || "month";
+const bucketLabel = (t) =>
+  UNIT === "month"
+    ? monthLabel(t)
+    : UNIT === "day"
+      ? date(t)
+      : new Date(t * 1000).toLocaleString("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC";
+const bucketSeconds = UNIT === "month" ? 31 * 86400 : UNIT === "day" ? 86400 : 3600;
 const pct = (x) => Math.round(x * 100) + "%";
 const plural = (n, w) => `${fmt(n)} ${w}${n === 1 ? "" : "s"}`;
 function duration(sec) {
@@ -37,7 +46,9 @@ function duration(sec) {
   if (d >= 60) return Math.round(d / 30.4) + " months";
   if (d >= 2) return Math.round(d) + " days";
   const h = sec / 3600;
-  return h >= 2 ? Math.round(h) + " hours" : "under 2 hours";
+  if (h >= 2) return Math.round(h) + " hours";
+  const m = Math.round(sec / 60);
+  return m >= 2 ? m + " minutes" : "a moment";
 }
 
 /** Tiny DOM builder: h("div.card", {title: "x"}, child, "text", ...) */
