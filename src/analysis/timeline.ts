@@ -70,17 +70,25 @@ export function segmentEras(months: MonthPoint[], totalCommits: number): Segment
     return c;
   };
 
-  // 2. Split the busiest splittable segment at its commit median.
+  // 2. Split the "heaviest" segment where weight blends commits and elapsed
+  //    time equally, so eras neither cram the busy early years together nor
+  //    let a quiet decade collapse into one era.
+  const weight = (k: number) => 0.5 * (months[k].commits / Math.max(1, totalCommits)) + 0.5 / n;
+  const weightIn = (s: Segment) => {
+    let w = 0;
+    for (let k = s.from; k <= s.to; k++) w += weight(k);
+    return w;
+  };
   const activeCount = () => segs.filter((s) => commitsIn(s) > 0).length;
   let guard = 0;
   while (activeCount() < target && guard++ < 50) {
     let best = -1;
-    let bestCommits = 0;
+    let bestWeight = 0;
     segs.forEach((s, k) => {
-      const c = commitsIn(s);
-      if (s.to - s.from >= 3 && c > bestCommits) {
+      const w = weightIn(s);
+      if (s.to - s.from >= 3 && commitsIn(s) > 0 && w > bestWeight) {
         best = k;
-        bestCommits = c;
+        bestWeight = w;
       }
     });
     if (best === -1) break;
@@ -88,8 +96,8 @@ export function segmentEras(months: MonthPoint[], totalCommits: number): Segment
     let acc = 0;
     let cut = s.from;
     for (let k = s.from; k <= s.to; k++) {
-      acc += months[k].commits;
-      if (acc >= bestCommits / 2) {
+      acc += weight(k);
+      if (acc >= bestWeight / 2) {
         cut = k;
         break;
       }
@@ -158,7 +166,9 @@ export function buildEras(commits: Commit[], months: MonthPoint[], tags: Tag[], 
   const segs = segmentEras(months, commits.length);
   const firstSeen = new Map<string, number>();
   const lastSeen = new Map<string, number>();
+  const totalBy = new Map<string, number>();
   for (const c of commits) {
+    bump(totalBy, c.author);
     if (!firstSeen.has(c.author)) firstSeen.set(c.author, c.time);
     lastSeen.set(c.author, c.time);
   }
@@ -186,11 +196,19 @@ export function buildEras(commits: Commit[], months: MonthPoint[], tags: Tag[], 
     }
     const moodShare: Partial<Record<Mood, number>> = {};
     for (const [m, v] of moods) moodShare[m] = inEra.length ? v / inEra.length : 0;
-    const newcomers = [...authors.keys()].filter((a) => (firstSeen.get(a) ?? 0) >= start);
+    // Only people who mattered get named: at least 3 commits overall, busiest first.
+    const notable = (a: string) => (totalBy.get(a) ?? 0) >= 3;
+    const newcomers = [...authors.entries()]
+      .filter(([a]) => (firstSeen.get(a) ?? 0) >= start && notable(a))
+      .sort((x, y) => y[1] - x[1])
+      .map(([a]) => a);
     const departures =
       k === segs.length - 1
         ? []
-        : [...authors.keys()].filter((a) => (lastSeen.get(a) ?? 0) <= end && (lastSeen.get(a) ?? 0) < lastCommitTime);
+        : [...authors.entries()]
+            .filter(([a]) => (lastSeen.get(a) ?? 0) <= end && (lastSeen.get(a) ?? 0) < lastCommitTime && notable(a))
+            .sort((x, y) => (totalBy.get(y[0]) ?? 0) - (totalBy.get(x[0]) ?? 0))
+            .map(([a]) => a);
     const base = {
       id: k,
       start,
