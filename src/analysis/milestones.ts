@@ -96,10 +96,12 @@ export function buildMilestones(commits: Commit[], tags: Tag[], lifecycle: Lifec
       hash: firstDeath.died!.hash,
     });
 
+  // Sort by author time: log order is not chronological after rebases.
+  const byTime = [...commits].sort((a, b) => a.time - b.time);
   let gap = { from: first, to: first, len: 0 };
-  for (let i = 1; i < commits.length; i++) {
-    const len = commits[i].time - commits[i - 1].time;
-    if (len > gap.len) gap = { from: commits[i - 1], to: commits[i], len };
+  for (let i = 1; i < byTime.length; i++) {
+    const len = byTime[i].time - byTime[i - 1].time;
+    if (len > gap.len) gap = { from: byTime[i - 1], to: byTime[i], len };
   }
   if (gap.len >= 30 * 86400)
     out.push({
