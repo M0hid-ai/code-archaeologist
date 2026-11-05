@@ -3,6 +3,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Report } from "../analysis/report.js";
+import { renderCard } from "./card.js";
 
 /** Locate the bundled `web/` directory, both from source and from dist. */
 export function webDir(): string {
@@ -64,11 +65,12 @@ export async function renderHtml(report: Report, dir = webDir()): Promise<string
   return html;
 }
 
-/** Write index.html (and optionally report.json) into `outDir`. */
+/** Write index.html and card.svg (and optionally report.json) into `outDir`. */
 export async function writeSite(report: Report, outDir: string, opts: { json?: boolean } = {}): Promise<string> {
   await mkdir(outDir, { recursive: true });
   const file = join(outDir, "index.html");
   await writeFile(file, await renderHtml(report), "utf8");
+  await writeFile(join(outDir, "card.svg"), renderCard(report), "utf8");
   if (opts.json) await writeFile(join(outDir, "report.json"), JSON.stringify(report, null, 2), "utf8");
   return file;
 }
