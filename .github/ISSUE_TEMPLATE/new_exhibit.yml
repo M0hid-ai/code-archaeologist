@@ -1,0 +1,16 @@
+name: New exhibit idea
+description: Propose a new wing, chart, archetype, epitaph or cause of death
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The exhibit
+      description: What would visitors learn about a codebase from it?
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: Where does the data come from?
+      description: Which git commands or analysis passes would feed it?
