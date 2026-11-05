@@ -52,3 +52,33 @@ export function humanDuration(seconds: number): string {
 export function isoDate(t: number): string {
   return new Date(t * 1000).toISOString().slice(0, 10);
 }
+
+/** Granularity of the activity series, chosen from the length of the history. */
+export type Unit = "hour" | "day" | "month";
+
+export function unitFor(first: number, last: number): Unit {
+  const span = last - first;
+  if (span < 3 * DAY) return "hour";
+  if (span < 120 * DAY) return "day";
+  return "month";
+}
+
+/** Start of the bucket containing `t`. */
+export function bucketStart(t: number, unit: Unit): number {
+  if (unit === "month") return monthStart(t);
+  const size = unit === "day" ? DAY : 3600;
+  return Math.floor(t / size) * size;
+}
+
+/** Start of the bucket after the one containing `t`. */
+export function nextBucket(t: number, unit: Unit): number {
+  if (unit === "month") return nextMonth(t);
+  return bucketStart(t, unit) + (unit === "day" ? DAY : 3600);
+}
+
+/** Every bucket start from the bucket of `from` through the bucket of `to`. */
+export function bucketsBetween(from: number, to: number, unit: Unit): number[] {
+  const out: number[] = [];
+  for (let b = bucketStart(from, unit); b <= to; b = nextBucket(b, unit)) out.push(b);
+  return out;
+}
