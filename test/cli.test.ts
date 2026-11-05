@@ -16,7 +16,7 @@ test("parseCli applies defaults", () => {
 });
 
 test("parseCli reads every option", () => {
-  const o = parseCli(["repo", "-o", "out", "--ai", "Claude", "--model", "m", "-n", "50", "--since", "2020-01-01", "--ref", "dev", "--blame-files", "10", "--json", "--open", "-q"]);
+  const o = parseCli(["repo", "-o", "out", "--ai", "Claude", "--model", "m", "-n", "50", "--since", "2020-01-01", "--ref", "dev", "--blame-files", "10", "-x", "vendor/", "--exclude", "*.snap", "--json", "--open", "-q"]);
   assert.deepEqual(o, {
     repo: "repo",
     out: "out",
@@ -26,6 +26,7 @@ test("parseCli reads every option", () => {
     since: "2020-01-01",
     ref: "dev",
     blameFiles: 10,
+    exclude: ["vendor/", "*.snap"],
     json: true,
     open: true,
     quiet: true,

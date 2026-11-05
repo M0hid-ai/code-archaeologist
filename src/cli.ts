@@ -1,14 +1,15 @@
 import { spawn } from "node:child_process";
-import { existsSync, mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { analyze } from "./analysis/index.js";
-import { readHistory } from "./git/history.js";
+import { readHistory, repoRoot } from "./git/history.js";
 import { git, isGitRepo } from "./git/run.js";
 import { aiNarrative, detectProvider, type AiProvider } from "./narrate/ai.js";
 import { writeSite } from "./render/site.js";
 import { summary } from "./summary.js";
+import { excludePaths, parseIgnoreFile } from "./util/glob.js";
 import { c, endStatus, status } from "./util/term.js";
 import { VERSION } from "./version.js";
 
@@ -30,6 +31,8 @@ ${c.bold("Options")}
       --since <date>     Only commits after this date (e.g. 2020-01-01, "2 years ago")
       --ref <rev>        Branch, tag or commit to excavate (default: HEAD)
       --blame-files <n>  Files to excavate with git blame (default: 150)
+  -x, --exclude <glob>   Leave matching paths out of every exhibit (repeatable;
+                         also read from .codearchignore in the repo root)
       --json             Also write report.json next to index.html
       --open             Open the museum in your browser when done
   -q, --quiet            Only print the output path
@@ -57,6 +60,7 @@ export interface CliOptions {
   since?: string;
   ref?: string;
   blameFiles?: number;
+  exclude: string[];
   json: boolean;
   open: boolean;
   quiet: boolean;
@@ -74,6 +78,7 @@ export function parseCli(argv: string[]): CliOptions | "help" | "version" {
       since: { type: "string" },
       ref: { type: "string" },
       "blame-files": { type: "string" },
+      exclude: { type: "string", short: "x", multiple: true },
       json: { type: "boolean" },
       open: { type: "boolean" },
       quiet: { type: "boolean", short: "q" },
@@ -101,6 +106,7 @@ export function parseCli(argv: string[]): CliOptions | "help" | "version" {
     since: values.since,
     ref: values.ref,
     blameFiles: int("blame-files", values["blame-files"]),
+    exclude: values.exclude ?? [],
     json: !!values.json,
     open: !!values.open,
     quiet: !!values.quiet,
@@ -151,13 +157,16 @@ export async function run(argv: string[]): Promise<number> {
   }
 
   const t0 = Date.now();
+  const ignoreFile = join(await repoRoot(repoDir), ".codearchignore");
+  const exclude = [...opts.exclude, ...(existsSync(ignoreFile) ? parseIgnoreFile(readFileSync(ignoreFile, "utf8")) : [])];
   say("Reading history");
-  const history = await readHistory(repoDir, {
+  const raw = await readHistory(repoDir, {
     ref: opts.ref,
     maxCommits: opts.maxCommits,
     since: opts.since,
     onProgress: (k) => say(`Reading history: ${k.toLocaleString("en")} commits`),
   });
+  const history = excludePaths(raw, exclude);
   if (history.commits.length === 0) {
     endStatus();
     console.error(c.red("error: ") + "no commits found to excavate");
