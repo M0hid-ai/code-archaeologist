@@ -5,10 +5,11 @@ Museum.wings.push({
   render() {
     const o = R.overview;
     const years = (o.lastCommit - o.firstCommit) / (365 * 86400);
-    const langs = o.languages.filter((l) => l.lines > 0);
-    const totalLang = langs.reduce((a, l) => a + l.lines, 0) || 1;
+    const langs = o.languages.filter((l) => l.lines > 0 && l.name !== "Other");
+    const unknownLines = o.languages.filter((l) => l.name === "Other").reduce((a, l) => a + l.lines, 0);
+    const totalLang = langs.reduce((a, l) => a + l.lines, 0) + unknownLines || 1;
     const shownLangs = langs.slice(0, 7);
-    const otherLines = langs.slice(7).reduce((a, l) => a + l.lines, 0);
+    const otherLines = langs.slice(7).reduce((a, l) => a + l.lines, 0) + unknownLines;
     const segs = shownLangs.map((l, i) => ({ label: l.name, lines: l.lines, color: seriesColor(i) }));
     if (otherLines) segs.push({ label: "Other", lines: otherLines, color: css("--series-other") });
 
@@ -40,7 +41,7 @@ Museum.wings.push({
                 tooltip(h("span", { style: { width: (sg.lines / totalLang) * 100 + "%", background: sg.color } }), `<b>${esc(sg.label)}</b><br>${fmt(sg.lines)} lines (${pct(sg.lines / totalLang)})`),
               ),
             ),
-            h("div.legend", segs.map((sg) => h("span", h("i", { style: { background: sg.color } }), `${sg.label} ${pct(sg.lines / totalLang)}`))),
+            h("div.legend", segs.map((sg) => h("span", h("i", { style: { background: sg.color } }), `${sg.label} ${sg.lines / totalLang < 0.01 ? "<1%" : pct(sg.lines / totalLang)}`))),
           )
         : null,
       h("div.scroll-cue", "Scroll to enter the museum ↓"),
