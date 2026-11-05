@@ -29,7 +29,7 @@ const EPITAPHS = {
   long: [
     "{name} served faithfully for {life} before {killer} laid it to rest.",
     "After {life} of service and {commits} commits, {name} sleeps.",
-    "{name} watched {authors} contributors come and go. It outlived most of them, but not {killer}.",
+    "{name} passed through {authors} pairs of hands. The last belonged to {killer}.",
   ],
   big: [
     "{lines} lines, all gone in a single commit. {name} was too big to live.",
@@ -78,7 +78,8 @@ export function buildGraveyard(commits: Commit[], lifecycle: Lifecycle, limit = 
   for (const l of lifecycle.all) {
     if (l.resurrectionOf === undefined) continue;
     const ghost = byId.get(l.resurrectionOf);
-    if (!ghost?.died || isNoise(l.path)) continue;
+    // A same-week return is usually a rename git failed to detect, not a resurrection.
+    if (!ghost?.died || isNoise(l.path) || l.born - ghost.died.time < 7 * 86400) continue;
     resurrected.add(ghost.id);
     zombies.push({ path: l.path, diedAt: ghost.died.time, returnedAt: l.born, returnedBy: l.bornBy });
   }
