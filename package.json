@@ -4,7 +4,7 @@
   "description": "Dig up the hidden history of any git repository and exhibit it as an explorable web museum.",
   "type": "module",
   "bin": {
-    "codearch": "dist/src/cli.js"
+    "codearch": "dist/src/bin.js"
   },
   "files": [
     "dist/src",
@@ -17,7 +17,7 @@
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "test": "npm run build && node scripts/run-tests.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "museum": "npm run build && node dist/src/cli.js"
+    "museum": "npm run build && node dist/src/bin.js"
   },
   "keywords": [
     "git",
