@@ -3,7 +3,11 @@
   const main = document.getElementById("museum");
   const nav = document.getElementById("nav");
   nav.append(h("span.brand", "🏺 " + R.overview.name));
+  // ?wings=graveyard,gallery renders a subset (embedding, screenshots, slow devices).
+  const only = new URLSearchParams(location.search).get("wings");
+  const wanted = only ? new Set(only.split(",").map((x) => x.trim())) : null;
   for (const wing of Museum.wings) {
+    if (wanted && !wanted.has(wing.id)) continue;
     let section;
     try {
       section = wing.render();
