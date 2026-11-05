@@ -17,7 +17,7 @@ function timelineChart() {
   const x = (i) => m.l + i * bw;
   const tOf = (t) => {
     const first = months[0].t;
-    const last = months[n - 1].t + 31 * 86400;
+    const last = months[n - 1].t + bucketSeconds;
     return m.l + ((t - first) / (last - first)) * iw;
   };
 
@@ -32,7 +32,7 @@ function timelineChart() {
     const text = x1 - x0 > 60 ? (label.length * 6.5 > x1 - x0 ? label.slice(0, Math.floor((x1 - x0) / 7)) + "…" : label) : x1 - x0 > 14 ? numeral : null;
     if (text) {
       const t = s("text", { x: x0 + 6, y: m.t - 10, class: "era-label" }, text);
-      tooltip(t, `<b>${numeral}. ${esc(label)}</b><br>${monthLabel(e.start)} – ${monthLabel(e.end)}`);
+      tooltip(t, `<b>${numeral}. ${esc(label)}</b><br>${bucketLabel(e.start)} – ${bucketLabel(e.end)}`);
       g.push(t);
     }
   });
@@ -42,14 +42,25 @@ function timelineChart() {
     g.push(s("line", { x1: m.l, x2: m.l + iw, y1: y(t), y2: y(t), stroke: css("--rule"), "stroke-dasharray": t ? "2 4" : null }));
     g.push(s("text", { x: m.l - 6, y: y(t) + 4, "text-anchor": "end" }, compact(t)));
   }
-  let lastYear = null;
-  months.forEach((p, i) => {
-    const yr = year(p.t);
-    if (yr !== lastYear && (i === 0 || new Date(p.t * 1000).getUTCMonth() === 0)) {
-      if (n < 400 || yr % 2 === 0) g.push(s("text", { x: x(i) + 1, y: H - 10 }, yr));
-      lastYear = yr;
-    }
-  });
+  if (UNIT === "month") {
+    let lastYear = null;
+    months.forEach((p, i) => {
+      const yr = year(p.t);
+      if (yr !== lastYear && (i === 0 || new Date(p.t * 1000).getUTCMonth() === 0)) {
+        if (n < 400 || yr % 2 === 0) g.push(s("text", { x: x(i) + 1, y: H - 10 }, yr));
+        lastYear = yr;
+      }
+    });
+  } else {
+    // About eight evenly spaced labels for day / hour buckets.
+    const every = Math.max(1, Math.ceil(n / 8));
+    months.forEach((p, i) => {
+      if (i % every) return;
+      const d = new Date(p.t * 1000);
+      const text = UNIT === "day" ? d.toLocaleDateString("en", { month: "short", day: "numeric", timeZone: "UTC" }) : String(d.getUTCHours()).padStart(2, "0") + ":00";
+      g.push(s("text", { x: x(i) + 1, y: H - 10 }, text));
+    });
+  }
   // Stacked bars, one segment per mood group (fixed slot order), surface gaps between segments.
   months.forEach((p, i) => {
     let acc = 0;
@@ -75,11 +86,11 @@ function timelineChart() {
     const r = s("rect", { x: x(i), y: m.t - 26, width: Math.max(bw, 2), height: ih + 26, fill: "transparent" });
     tooltip(r, () => {
       const rows = MOOD_GROUPS.map((mg, k) => (stacks[i][k] ? ttRow(mg.label, fmt(stacks[i][k])) : "")).join("");
-      return `<b>${monthLabel(p.t)}</b>${ttRow("Commits", fmt(p.commits))}${ttRow("Contributors", fmt(p.authors))}${ttRow("Lines +/-", `+${compact(p.added)} / -${compact(p.deleted)}`)}<hr style="border:0;border-top:1px solid var(--rule);margin:6px 0">${rows}`;
+      return `<b>${bucketLabel(p.t)}</b>${ttRow("Commits", fmt(p.commits))}${ttRow("Contributors", fmt(p.authors))}${ttRow("Lines +/-", `+${compact(p.added)} / -${compact(p.deleted)}`)}<hr style="border:0;border-top:1px solid var(--rule);margin:6px 0">${rows}`;
     });
     return r;
   });
-  const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": "Commits per month, stacked by kind of work, with eras shaded" }, g, hits);
+  const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": `Commits per ${UNIT}, stacked by kind of work, with eras shaded` }, g, hits);
 
   const legend = h(
     "div.legend",
@@ -88,9 +99,9 @@ function timelineChart() {
     tags.length ? h("span", h("i", { style: { background: css("--gold"), borderRadius: "0", clipPath: "polygon(50% 0,100% 100%,0 100%)" } }), "Release") : null,
   );
   const table = tableView(
-    "Show monthly data as a table",
-    ["Month", "Commits", "Contributors", "Added", "Deleted"],
-    months.filter((p) => p.commits).map((p) => [monthLabel(p.t), fmt(p.commits), fmt(p.authors), fmt(p.added), fmt(p.deleted)]),
+    `Show ${UNIT === "day" ? "daily" : UNIT === "hour" ? "hourly" : "monthly"} data as a table`,
+    [UNIT[0].toUpperCase() + UNIT.slice(1), "Commits", "Contributors", "Added", "Deleted"],
+    months.filter((p) => p.commits).map((p) => [bucketLabel(p.t), fmt(p.commits), fmt(p.authors), fmt(p.added), fmt(p.deleted)]),
   );
   return h("div.panel", svg, legend, table);
 }
@@ -110,7 +121,7 @@ function eraCards() {
       ];
       return h(
         "article.card.era.reveal",
-        h("div", h("div.when", monthLabel(e.start)), h("div.when", "to " + monthLabel(e.end)), h("div.when", duration(e.end - e.start))),
+        h("div", h("div.when", bucketLabel(e.start)), h("div.when", "to " + bucketLabel(e.end)), h("div.when", duration(e.end - e.start))),
         h(
           "div",
           h("h3", (nar && nar.title) || e.name),
