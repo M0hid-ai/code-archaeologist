@@ -117,6 +117,13 @@ export function isRemote(repo: string): boolean {
   return /^(https?:\/\/|git@|ssh:\/\/|git:\/\/)/.test(repo) && !existsSync(repo);
 }
 
+/** "https://github.com/a/b.git" or "git@host:a/b" -> "b" (falls back to "repo"). */
+export function repoNameFromUrl(url: string): string {
+  const last = url.replace(/[\\/]+$/, "").split(/[\\/:]/).pop() ?? "";
+  const name = last.replace(/\.git$/, "").replace(/[^\w.-]/g, "");
+  return name && name !== "." && name !== ".." ? name : "repo";
+}
+
 function openInBrowser(file: string): void {
   const [cmd, args] =
     process.platform === "win32" ? ["cmd", ["/c", "start", "", file]] : process.platform === "darwin" ? ["open", [file]] : ["xdg-open", [file]];
@@ -146,7 +153,8 @@ export async function run(argv: string[]): Promise<number> {
 
   let repoDir = resolve(opts.repo);
   if (isRemote(opts.repo)) {
-    repoDir = join(mkdtempSync(join(tmpdir(), "codearch-")), "repo");
+    // Clone into a folder named after the repository so the museum gets the right title.
+    repoDir = join(mkdtempSync(join(tmpdir(), "codearch-")), repoNameFromUrl(opts.repo));
     say(`Cloning ${opts.repo}`);
     await git(tmpdir(), ["clone", "--quiet", opts.repo, repoDir]);
   }

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, rmSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { isRemote, parseCli, run } from "../src/cli.js";
+import { isRemote, parseCli, repoNameFromUrl, run } from "../src/cli.js";
 import { storyRepo } from "./fixture.js";
 
 test("parseCli applies defaults", () => {
@@ -80,4 +80,12 @@ test("run fails cleanly outside a repository", async () => {
     console.error = err;
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("repoNameFromUrl titles cloned museums after the repository", () => {
+  assert.equal(repoNameFromUrl("https://github.com/M0hid-ai/obd2-dash"), "obd2-dash");
+  assert.equal(repoNameFromUrl("https://github.com/expressjs/express.git/"), "express");
+  assert.equal(repoNameFromUrl("git@github.com:a/b.git"), "b");
+  assert.equal(repoNameFromUrl("https://host/"), "host");
+  assert.equal(repoNameFromUrl("///"), "repo");
 });
