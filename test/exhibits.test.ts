@@ -149,3 +149,13 @@ test("frameWindows: monthly for normal histories, bucketed otherwise", () => {
   const decades = [commit("a", at(1990, 1, 1), "x"), commit("a", at(2020, 1, 1), "y")];
   assert.equal(frameWindows(decades).starts.length, 160);
 });
+
+test("strata switch to months when all surviving code is from one year", async () => {
+  const { strataLayers } = await import("../src/analysis/survivors.js");
+  const young = strataLayers(new Map([[2026, 30]]), new Map([["2026-08", 20], ["2026-09", 10]]));
+  assert.equal(young.strataUnit, "month");
+  assert.deepEqual(young.strata.map((x) => x.label), ["Aug 2026", "Sep 2026"]);
+  const old = strataLayers(new Map([[2024, 5], [2020, 9]]), new Map([["2020-01", 9], ["2024-02", 5]]));
+  assert.equal(old.strataUnit, "year");
+  assert.deepEqual(old.strata.map((x) => x.label), ["2020", "2024"]);
+});

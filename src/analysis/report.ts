@@ -120,7 +120,9 @@ export interface Survivors {
   /** Living files untouched for the longest time. */
   fossils: Fossil[];
   /** Year -> number of surviving lines first written that year (sampled files). */
-  strata: { year: number; lines: number }[];
+  strata: { year: number; label: string; lines: number }[];
+  /** Strata are per year, or per month when all surviving code is from a single year. */
+  strataUnit: "year" | "month";
   sampledFiles: number;
   sampledLines: number;
 }

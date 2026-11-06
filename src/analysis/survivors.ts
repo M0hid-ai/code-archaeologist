@@ -118,6 +118,7 @@ export async function buildSurvivors(commits: Commit[], lifecycle: Lifecycle, op
 
   const files = sampleFiles(lifecycle, opts.maxFiles ?? 150, opts.maxLines ?? 5000);
   const strata = new Map<number, number>();
+  const monthly = new Map<string, number>();
   const fns: SurvivorFunction[] = [];
   let sampledLines = 0;
   let done = 0;
@@ -133,6 +134,8 @@ export async function buildSurvivors(commits: Commit[], lifecycle: Lifecycle, op
       if (!l.time) continue;
       const year = new Date(l.time * 1000).getUTCFullYear();
       strata.set(year, (strata.get(year) ?? 0) + 1);
+      const month = new Date(l.time * 1000).toISOString().slice(0, 7);
+      monthly.set(month, (monthly.get(month) ?? 0) + 1);
     }
     if (supportsFunctions(life.path) && !isTest(life.path)) fns.push(...functionSurvivors(life, lines, commits, opts.canonical));
     opts.onProgress?.(++done, files.length);
@@ -158,8 +161,29 @@ export async function buildSurvivors(commits: Commit[], lifecycle: Lifecycle, op
     functions,
     elders,
     fossils,
-    strata: [...strata.entries()].sort((a, b) => a[0] - b[0]).map(([year, lines]) => ({ year, lines })),
+    ...strataLayers(strata, monthly),
     sampledFiles: files.length,
     sampledLines,
+  };
+}
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * Year layers for old codebases; month layers when every surviving line is
+ * from the same year (a young project would otherwise be one solid band).
+ */
+export function strataLayers(byYear: Map<number, number>, byMonth: Map<string, number>): Pick<Survivors, "strata" | "strataUnit"> {
+  if (byYear.size >= 2 || byMonth.size <= 1) {
+    return {
+      strataUnit: "year",
+      strata: [...byYear.entries()].sort((a, b) => a[0] - b[0]).map(([year, lines]) => ({ year, label: String(year), lines })),
+    };
+  }
+  return {
+    strataUnit: "month",
+    strata: [...byMonth.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, lines]) => ({ year: Number(key.slice(0, 4)), label: `${MONTHS[Number(key.slice(5, 7)) - 1]} ${key.slice(0, 4)}`, lines })),
   };
 }
