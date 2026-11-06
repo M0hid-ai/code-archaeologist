@@ -18,7 +18,7 @@ export function summary(r: Report): string {
     lines.push(`  ${c.gold("Eras")}`);
     for (const e of r.eras) {
       const title = r.narrative.eras.find((x) => x.id === e.id)?.title ?? e.name;
-      lines.push(`     ${c.bold(title.padEnd(26))} ${c.gray(`${isoDate(e.start).slice(0, 7)} – ${isoDate(e.end).slice(0, 7)}`)}  ${n(e.commits)} commits`);
+      lines.push(`     ${c.bold(title.padEnd(26))} ${c.gray(`${isoDate(e.start).slice(0, 7)} – ${isoDate(e.end).slice(0, 7)}`)}  ${n(e.commits)} ${e.commits === 1 ? "commit" : "commits"}`);
     }
   }
   const s = r.survivors.functions[0];
@@ -36,7 +36,7 @@ export function summary(r: Report): string {
   const h = r.battlefield.hotspots[0];
   if (h) {
     lines.push("");
-    lines.push(`  ${c.gold("Hottest battleground")}  ${c.cyan(h.path)} ${c.gray(`${n(h.commits)} commits, ${n(h.authors)} authors, ${n(h.fixes)} fixes`)}`);
+    lines.push(`  ${c.gold("Hottest battleground")}  ${c.cyan(h.path)} ${c.gray(`${n(h.commits)} commits, ${n(h.authors)} ${h.authors === 1 ? "author" : "authors"}, ${n(h.fixes)} ${h.fixes === 1 ? "fix" : "fixes"}`)}`);
   }
   lines.push("");
   lines.push(`  ${c.gray(`narration: ${r.narrative.source === "offline" ? "offline curator" : `${r.narrative.source} (${r.narrative.model})`}`)}`);
