@@ -11,7 +11,7 @@ export function summary(r: Report): string {
   lines.push("");
   lines.push(`  ${c.gold("🏺")} ${c.bold(o.name)} ${c.gray(`${isoDate(o.firstCommit)} → ${isoDate(o.lastCommit)} (${humanDuration(o.lastCommit - o.firstCommit)})`)}`);
   lines.push(
-    `     ${c.bold(n(o.commits))} commits · ${c.bold(n(o.contributors))} contributors · ${c.green("+" + n(o.linesAdded))} ${c.red("-" + n(o.linesDeleted))} · ${c.bold(n(o.linesAlive))} lines alive`,
+    `     ${c.bold(n(o.commits))} commits · ${c.bold(n(o.contributors))} ${o.contributors === 1 ? "contributor" : "contributors"} · ${c.green("+" + n(o.linesAdded))} ${c.red("-" + n(o.linesDeleted))} · ${c.bold(n(o.linesAlive))} lines alive`,
   );
   if (r.eras.length) {
     lines.push("");
