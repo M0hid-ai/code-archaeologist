@@ -25,7 +25,8 @@ function strata() {
   const total = st.reduce((a, x) => a + x.lines, 0) || 1;
   // Ordinal one-hue ramp (blue), oldest layers darkest, every step >= 2:1 against the dark surface.
   const ramp = ["#184f95", "#1c5cab", "#256abf", "#2a78d6", "#3987e5", "#5598e7", "#6da7ec", "#86b6ef", "#9ec5f4", "#b7d3f6"];
-  const color = (k) => ramp[Math.round((k / Math.max(1, st.length - 1)) * (ramp.length - 1))];
+  const step = (k) => Math.round((k / Math.max(1, st.length - 1)) * (ramp.length - 1));
+  const color = (k) => ramp[step(k)];
   const H = Math.max(260, Math.min(520, st.length * 34));
   const sample = h(
     "div.core-sample",
@@ -35,7 +36,7 @@ function strata() {
       const hgt = Math.max(4, (x.lines / total) * H);
       const band = h(
         "div",
-        { style: { height: hgt + "px", background: color(idx), color: idx > st.length / 2 ? "#0b0b0b" : "#f0efec" } },
+        { style: { height: hgt + "px", background: color(idx), color: step(idx) >= 5 ? "#0b0b0b" : "#f0efec" } },
         hgt >= 16 ? h("span", x.label || x.year) : null,
         hgt >= 16 ? h("span", `${fmt(x.lines)} lines · ${pct(x.lines / total)}`) : null,
       );
