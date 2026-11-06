@@ -100,7 +100,7 @@ export function offlineNarrative(r: Report): Narrative {
     survivors: toughest
       ? `${toughest.name}() in ${toughest.path} was written by ${toughest.bornBy} on ${isoDate(toughest.born)} and has survived ${fmt(toughest.commitsSurvived)} commits to its file, ${fmt(toughest.refactorsSurvived)} of them refactors.${oldestFn && oldestFn !== toughest ? ` The oldest living definition is ${oldestFn.name}(), dating from ${isoDate(oldestFn.born)}.` : ""}`
       : `The oldest living files of ${o.name}, and the code that has stayed put the longest.`,
-    strata: `Like rock layers, each band shows how many surviving lines were written in that year (from ${fmt(s.sampledFiles)} excavated files).`,
+    strata: `Like rock layers, each band shows how many surviving lines were written in that ${s.strataUnit} (from ${fmt(s.sampledFiles)} excavated files).`,
     battlefield: topHot
       ? `${topHot.path} is the most contested ground: ${fmt(topHot.commits)} commits by ${fmt(topHot.authors)} people${topHot.fixes ? `, ${fmt(topHot.fixes)} of them bug fixes` : ""}.${topRival ? ` The fiercest tug-of-war: ${topRival.a} vs ${topRival.b} over ${topRival.path} (${topRival.skirmishes} skirmishes).` : ""}`
       : `No real battles here. A peaceful codebase.`,

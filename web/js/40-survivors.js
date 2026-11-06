@@ -18,7 +18,7 @@ function survivorCards() {
   );
 }
 
-/** Code strata: a core sample, one band per year, thickness = surviving lines. */
+/** Code strata: a core sample, one band per year (or month), thickness = surviving lines. */
 function strata() {
   const st = R.survivors.strata;
   if (!st.length) return null;
@@ -29,17 +29,17 @@ function strata() {
   const H = Math.max(260, Math.min(520, st.length * 34));
   const sample = h(
     "div.core-sample",
-    { role: "img", "aria-label": "Surviving lines by year written" },
+    { role: "img", "aria-label": `Surviving lines by ${R.survivors.strataUnit || "year"} written` },
     [...st].reverse().map((x, k) => {
       const idx = st.length - 1 - k;
       const hgt = Math.max(4, (x.lines / total) * H);
       const band = h(
         "div",
         { style: { height: hgt + "px", background: color(idx), color: idx > st.length / 2 ? "#0b0b0b" : "#f0efec" } },
-        hgt >= 16 ? h("span", x.year) : null,
+        hgt >= 16 ? h("span", x.label || x.year) : null,
         hgt >= 16 ? h("span", `${fmt(x.lines)} lines · ${pct(x.lines / total)}`) : null,
       );
-      return tooltip(band, `<b>${x.year}</b>${ttRow("Surviving lines", fmt(x.lines))}${ttRow("Share", pct(x.lines / total))}`);
+      return tooltip(band, `<b>${x.label || x.year}</b>${ttRow("Surviving lines", fmt(x.lines))}${ttRow("Share", pct(x.lines / total))}`);
     }),
   );
   const oldest = st[0];
@@ -51,9 +51,9 @@ function strata() {
     h(
       "div",
       h("p.placard", R.narrative.placards.strata || ""),
-      h("p", { style: { color: "var(--text-secondary)" } }, `The deepest layer dates from ${oldest.year}: ${fmt(oldest.lines)} lines written then are still running today. The thickest layer is ${dominant.year} (${pct(dominant.lines / total)} of what survives).`),
+      h("p", { style: { color: "var(--text-secondary)" } }, `The deepest layer dates from ${oldest.label || oldest.year}: ${fmt(oldest.lines)} lines written then are still running today. The thickest layer is ${dominant.label || dominant.year} (${pct(dominant.lines / total)} of what survives).`),
       h("p.muted.small", `Excavated ${fmt(R.survivors.sampledFiles)} files, ${fmt(R.survivors.sampledLines)} lines, with git blame.`),
-      tableView("Show strata as a table", ["Year", "Surviving lines", "Share"], st.map((x) => [x.year, fmt(x.lines), pct(x.lines / total)])),
+      tableView("Show strata as a table", [R.survivors.strataUnit === "month" ? "Month" : "Year", "Surviving lines", "Share"], st.map((x) => [x.label || x.year, fmt(x.lines), pct(x.lines / total)])),
     ),
   );
 }
